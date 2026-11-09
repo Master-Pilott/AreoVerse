@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b10">
+  <meta name="description" content="A welcoming aviation club for teens: learn about flying, explore flight simulation, and meet your crew.">
+  <title>AreoVerse — Teen Aviation Club</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b10;
+      --surface: #111720;
+      --surface-soft: #151d27;
+      --text: #f4f6fa;
+      --muted: #a4afbd;
+      --line: rgba(224, 235, 248, .13);
+      --blue: #70b7ff;
+      --lime: #d7f36a;
+      --content: 1120px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { width: min(var(--content), calc(100% - 48px)); margin-inline: auto; }
+    .topbar {
+      display: none;
+    }
+
+    .site-header {
+      position: relative;
+      min-height: 720px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(4, 17, 30, 0.38), rgba(3, 10, 18, 0.22)),
+        linear-gradient(90deg, #081d31 0%, #0b2039 26%, #1a2d48 49%, #0b2038 68%, #091b2e 100%);
+      isolation: isolate;
+    }
+
+    .site-header::before {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(241, 194, 149, 0.42), transparent 16%),
+        radial-gradient(circle at 75% 42%, rgba(244, 169, 121, 0.14), transparent 26%),
+        linear-gradient(180deg, rgba(5, 13, 24, 0.1), rgba(3, 5, 12, 0.7));
+      content: "";
+      z-index: -2;
+    }
+
+    .airport-scene {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(7, 20, 32, 0.18) 0%, rgba(6, 12, 18, 0.12) 34%, rgba(2, 5, 10, 0.58) 100%),
+        url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+      filter: saturate(0.75) brightness(0.72);
+      transform: scale(1.08);
+      z-index: -3;
+    }
+
+    .airport-scene::before {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.35));
+      content: "";
+    }
+
+    .airport-scene::after {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -4%;
+      height: 42%;
+      background: linear-gradient(180deg, rgba(2, 7, 14, 0.24), rgba(4, 9, 16, 0.9));
+      clip-path: polygon(0 34%, 11% 20%, 28% 12%, 35% 18%, 39% 12%, 52% 10%, 68% 18%, 81% 15%, 100% 26%, 100% 100%, 0 100%);
+      content: "";
+    }
+
+    .header-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(18px, 2.8vw, 42px);
+      min-height: 720px;
+      padding: 60px 36px 70px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      min-width: 390px;
+      padding-right: clamp(18px, 2vw, 32px);
+    }
+
+    .brand-separator {
+      width: 1px;
+      height: clamp(120px, 14vw, 245px);
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 18px rgba(165, 216, 255, 0.18);
+    }
+
+    .brand-mark {
+      width: clamp(180px, 22vw, 340px);
+      height: auto;
+      flex-shrink: 0;
+      filter: drop-shadow(0 10px 24px rgba(11, 23, 33, 0.28));
+    }
+
+    .brand-text {
+      display: inline-block;
+      margin-top: 18px;
+      color: #edf5ff;
+      font-size: clamp(22px, 2vw, 38px);
+      font-weight: 800;
+      letter-spacing: -.07em;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(50, 130, 255, 0.15);
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 480px;
+      padding-inline: 8px;
+    }
+
+    .title-plane {
+      width: clamp(70px, 5vw, 95px);
+      height: auto;
+      margin-bottom: 10px;
+      opacity: 0.96;
+      filter: drop-shadow(0 6px 16px rgba(16, 24, 31, 0.2));
+    }
+
+    h1.hero-title {
+      margin: 0;
+      color: #f5f8ff;
+      font-size: clamp(88px, 9vw, 230px);
+      font-weight: 900;
+      letter-spacing: -.075em;
+      line-height: 0.85;
+      text-transform: uppercase;
+      text-shadow: 0 8px 20px rgba(10, 13, 18, 0.24);
+    }
+
+    .subtitle {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 10px;
+      color: rgba(245, 248, 255, 0.95);
+      font-size: clamp(12px, 1.3vw, 28px);
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .subtitle span {
+      color: rgba(231, 238, 251, 0.92);
+      font-size: 0.75em;
+    }
+
+    .tower {
+      position: absolute;
+      right: clamp(60px, 11vw, 170px);
+      bottom: clamp(16px, 5vw, 40px);
+      width: clamp(120px, 11vw, 200px);
+      height: clamp(160px, 21vw, 300px);
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 0 14px rgba(255,255,255,0.08), 0 0 28px rgba(16, 19, 24, 0.22);
+      z-index: 1;
+    }
+
+    .tower::before {
+      position: absolute;
+      inset: 8% 20% auto 20%;
+      height: 68%;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.12),
+        rgba(255,255,255,0.12) 6px,
+        rgba(255,255,255,0.02) 6px,
+        rgba(255,255,255,0.02) 11px
+      );
+      border-radius: 4px 4px 0 0;
+      content: "";
+    }
+
+    .tower::after {
+      position: absolute;
+      width: 26%;
+      height: 18%;
+      left: 37%;
+      bottom: -20%;
+      border-radius: 0 0 12px 12px;
+      background: rgba(14, 26, 38, 0.82);
+      content: "";
+    }
+
+    .runway-glow {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -16px;
+      height: 22%;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(3, 7, 14, 0.68));
+      z-index: 0;
+    }
+
+    .runway-glow::before {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      width: min(62vw, 1060px);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(99, 171, 255, 0.82), transparent);
+      transform: translateX(-50%);
+      box-shadow: 0 0 16px rgba(97, 168, 255, 0.7);
+      content: "";
+    }
+
+    @media (max-width: 980px) {
+      .site-header {
+        min-height: 600px;
+      }
+      .header-wrap {
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+        min-height: 600px;
+      }
+      .brand-block {
+        min-width: 0;
+        padding: 0;
+        gap: 18px;
+      }
+      .brand-separator {
+        height: 160px;
+      }
+      .title-block {
+        min-width: 0;
+      }
+      .subtitle {
+        letter-spacing: .08em;
+        gap: 12px;
+        white-space: normal;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .brand-block {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .brand-separator {
+        display: none;
+      }
+      .brand-text {
+        margin-top: 0;
+      }
+      .subtitle {
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        gap: 8px 10px;
+        letter-spacing: .05em;
+      }
+      .subtitle span {
+        display: none;
+      }
+      .tower {
+        right: 18px;
+        bottom: 12px;
+      }
+    }
+
+    .values { border-block: 1px solid var(--line); background: #0c1118; }
+    .values-row { display: flex; min-height: 65px; align-items: center; justify-content: space-between; gap: 20px; color: #bec8d3; font-size: 11px; }
+    .values-row span { display: flex; align-items: center; gap: 9px; }
+    .values-row b { color: var(--blue); font-size: 12px; font-weight: 500; }
+    section { scroll-margin-top: 28px; }
+    .section { padding: 100px 0; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 35px; margin-bottom: 36px; }
+    h2 { max-width: 620px; margin: 15px 0 0; font-size: clamp(38px, 5vw, 57px); font-weight: 650; letter-spacing: -.07em; line-height: 1.04; }
+    .section-heading > p { max-width: 360px; margin: 0 0 4px; color: var(--muted); font-size: 12px; line-height: 1.85; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .card { min-height: 205px; padding: 23px; border: 1px solid var(--line); background: #0e141c; }
+    .card-index { color: var(--blue); font-size: 11px; }
+    .card h3 { margin: 28px 0 10px; font-size: 19px; font-weight: 600; letter-spacing: -.035em; }
+    .card p { max-width: 280px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.8; }
+
+    .signup { padding: 0 0 100px; }
+    .signup-panel { display: grid; grid-template-columns: 1fr .82fr; gap: 48px; padding: 42px; border: 1px solid rgba(112,183,255,.25); background: radial-gradient(ellipse at 87% 45%, rgba(62,137,204,.12), transparent 38%), #101720; }
+    .signup-copy h2 { max-width: 540px; font-size: clamp(38px, 4.7vw, 55px); }
+    .signup-copy > p { max-width: 490px; margin: 16px 0 25px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .signup-steps { display: grid; gap: 17px; margin: 0 0 24px; padding: 0; list-style: none; }
+    .signup-step { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; }
+    .step-number { display: grid; width: 27px; height: 27px; place-items: center; border: 1px solid rgba(112,183,255,.45); border-radius: 50%; color: var(--blue); font-size: 10px; font-weight: 700; }
+    .signup-step strong { display: block; font-size: 12px; }
+    .signup-step span:last-child { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .signup-cta { min-height: 44px; }
+    .payment-card { display: flex; align-items: center; flex-direction: column; justify-content: center; padding: 24px; border: 1px solid var(--line); background: rgba(5,8,12,.54); text-align: center; }
+    .payment-label { color: var(--blue); font-size: 11px; font-weight: 650; }
+    .payment-card h3 { margin: 11px 0 8px; font-size: 18px; letter-spacing: -.04em; }
+    .payment-card > p { max-width: 285px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .payment-qr { display: block; width: min(220px, 100%); height: auto; margin: 19px 0 12px; background: white; }
+    .payment-warning { max-width: 300px; margin: 0; color: #c2c9d2; font-size: 10px; line-height: 1.65; }
+    .payment-warning strong { color: var(--lime); }
+
+    .copilot { padding: 0 0 100px; }
+    .copilot-panel { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 30px; padding: 39px 42px; border: 1px solid rgba(112,183,255,.24); background: radial-gradient(ellipse at 88% 50%, rgba(62,137,204,.12), transparent 38%), #101720; }
+    .copilot-panel h2 { max-width: 620px; font-size: clamp(35px, 4.5vw, 51px); }
+    .copilot-panel p { max-width: 600px; margin: 13px 0 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .copilot-panel .button { white-space: nowrap; }
+
+    .resources { border-top: 1px solid var(--line); background: #0b1016; }
+    .resource-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 42px 75px; }
+    .resource-copy h2 { max-width: 420px; }
+    .resource-copy > p { max-width: 390px; margin-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .resource-links { display: grid; align-content: center; }
+    .resource-link { display: grid; grid-template-columns: 38px 1fr 18px; align-items: center; gap: 13px; padding: 15px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .resource-icon { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--blue); font-size: 10px; }
+    .resource-link strong { display: block; font-size: 12px; }
+    .resource-link small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+    .resource-arrow { color: var(--blue); transition: transform .2s ease; }
+    .resource-link:hover .resource-arrow { transform: translate(3px, -2px); }
+    .safety-note { grid-column: 1 / -1; display: flex; gap: 12px; padding: 15px; border: 1px solid var(--line); color: #aeb8c4; font-size: 10px; line-height: 1.75; }
+    .safety-note b { color: var(--lime); white-space: nowrap; }
+    footer { padding: 25px 0; border-top: 1px solid var(--line); }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .footer-inner p { margin: 0; color: #8d98a6; font-size: 10px; line-height: 1.6; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 10px; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+
+    @media (max-width: 760px) {
+      .wrap { width: min(100% - 36px, 560px); }
+      .nav { min-height: 68px; }
+      .nav-links { gap: 15px; }
+      .nav-links a { font-size: 10px; }
+      .nav-links a:nth-child(2) { display: none; }
+      .hero { min-height: auto; padding: 105px 0 48px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 0; }
+      .hero-copy { padding-top: 26px; }
+      h1 { font-size: clamp(53px, 12vw, 75px); }
+      .sky-scene { min-height: 310px; }
+      .sky-ring { width: min(320px, 82%); }
+      .aircraft { width: min(380px, 96%); }
+      .scene-coordinate { top: 21px; }
+      .scene-caption { right: 2%; bottom: 13px; }
+      .values-row { min-height: 58px; justify-content: center; flex-wrap: wrap; padding-block: 12px; }
+      .values-row span { font-size: 9px; }
+      .values-row span:nth-child(3) { display: none; }
+      .section { padding-block: 75px; }
+      .section-heading { display: block; margin-bottom: 27px; }
+      .section-heading > p { margin-top: 14px; }
+      .cards { grid-template-columns: 1fr; }
+      .card { min-height: 175px; }
+      .card h3 { margin-top: 24px; }
+      .signup { padding-bottom: 75px; }
+      .signup-panel { grid-template-columns: 1fr; gap: 25px; padding: 28px 23px; }
+      .payment-card { padding: 22px 18px; }
+      .payment-qr { width: min(210px, 75vw); }
+      .copilot { padding-bottom: 75px; }
+      .copilot-panel { grid-template-columns: 1fr; padding: 28px 23px; }
+      .copilot-panel .button { justify-self: start; }
+      .resource-grid { grid-template-columns: 1fr; gap: 25px; }
+      .safety-note { grid-column: auto; display: block; }
+      .safety-note b { display: block; margin-bottom: 5px; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 380px) {
+      .wrap { width: calc(100% - 28px); }
+      .brand-name { font-size: 14px; }
+      .nav-links { gap: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" aria-label="AeroVerse hero header">
+    <div class="airport-scene" aria-hidden="true"></div>
+    <div class="header-wrap">
+      <div class="brand-block" aria-label="AeroVerse brand">
+        <svg class="brand-mark" viewBox="0 0 420 220" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <path d="M47 170L131 29H165L256 170H219L196 128H108L86 170H47ZM120 96H185L169 74L120 96Z" fill="#F7FBFF"/>
+          <path d="M175 170L265 30H301L220 170H175Z" fill="#F7FBFF"/>
+          <path d="M51 170C112 153 171 146 252 146C302 146 331 152 366 166" stroke="#1F7FFF" stroke-width="16" stroke-linecap="round" fill="none"/>
+          <path d="M262 50L335 104L303 112L267 81L262 50Z" fill="#1F7FFF"/>
+          <path d="M143 63L227 116L208 122L124 71L143 63Z" fill="#1F7FFF" opacity="0.8"/>
+          <path d="M24 163L86 110L118 120L53 173L24 163Z" fill="#1F7FFF" opacity="0.8"/>
+          <path d="M115 113L181 66L196 80L138 118L115 113Z" fill="#0B1F2F" opacity="0.7"/>
+          <path d="M56 139C80 125 105 117 138 113L168 120C153 124 137 130 118 138L56 139Z" fill="#F7FBFF"/>
+          <path d="M250 120L303 92L335 100L284 135L250 120Z" fill="#F7FBFF" opacity="0.92"/>
+          <path d="M13 185C98 174 157 170 267 170C302 170 340 171 391 179" stroke="#1F7FFF" stroke-width="9" stroke-linecap="round" opacity="0.75"/>
+          <path d="M246 73L285 89L315 103L256 116L246 73Z" fill="#0B1F2F" opacity="0.62"/>
+        </svg>
+        <div class="brand-text">AEROVERSE</div>
+      </div>
+      <div class="brand-separator" aria-hidden="true"></div>
+      <div class="title-block" aria-label="Pilot content">
+        <svg class="title-plane" viewBox="0 0 180 80" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 37L52 34L84 13L94 17L79 38L121 37L151 27C158 25 166 30 167 37L166 42L150 48L124 68L86 64L81 72L73 71L74 60L44 60L31 71L20 70L26 56L8 53L7 37Z" fill="#F4F9FF"/>
+          <path d="M41 34L74 11L82 16L65 35L41 34Z" fill="#C8E6FF" opacity="0.88"/>
+          <path d="M112 36L124 34L154 28" stroke="#1B73E8" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h1 class="hero-title">PILOTS</h1>
+        <div class="subtitle"><span>•</span> CHAT <span>•</span> FLIGHT UPDATES <span>•</span> TRAINING</div>
+      </div>
+    </div>
+    <div class="tower" aria-hidden="true"></div>
+    <div class="runway-glow" aria-hidden="true"></div>
+  </header>
+
+  <main>
+
+    <div class="values" aria-label="Club highlights">
+      <div class="values-row wrap">
+        <span><b>·</b> Learn together</span>
+        <span><b>·</b> Try flight sims</span>
+        <span><b>·</b> Ask questions</span>
+        <span><b>·</b> Meet other plane fans</span>
+      </div>
+    </div>
+
+    <section class="section wrap" id="club">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">A bit about us</div>
+          <h2>We’re here because we love planes.</h2>
+        </div>
+        <p>Some of us are just getting started; others have been into aviation for years. Either way, there’s always something new to learn.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <span class="card-index">Start with the basics</span>
+          <h3>Planes, weather, and flying</h3>
+          <p>Explore aircraft, airports, weather, and the ideas that get a plane safely from one place to another.</p>
+        </article>
+        <article class="card">
+          <span class="card-index">When you’re ready</span>
+          <h3>Try a flight simulator</h3>
+          <p>Try a flight simulator, plan a route, or join a shared-cockpit flight with a friend from the community.</p>
+        </article>
+        <article class="card">
+          <span class="card-index">Along the way</span>
+          <h3>Find people who get it</h3>
+          <p>Swap discoveries, get help with sim basics, and connect with other young aviation enthusiasts.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="signup wrap" id="signup">
+      <div class="signup-panel">
+        <div class="signup-copy">
+          <div class="eyebrow">Flight class</div>
+          <h2>Want to join a class?</h2>
+          <p>We take applications in Discord. Join the server, find the flight-class form channel, and send in your application. We’ll message you when there’s an update.</p>
+          <ol class="signup-steps">
+            <li class="signup-step">
+              <span class="step-number">01</span>
+              <span><strong>Join the Discord</strong><span>Head to the flight-class form channel to get started.</span></span>
+            </li>
+            <li class="signup-step">
+              <span class="step-number">02</span>
+              <span><strong>Fill in the form</strong><span>Send it in Discord. We’ll let you know whether you got a spot.</span></span>
+            </li>
+            <li class="signup-step">
+              <span class="step-number">03</span>
+              <span><strong>If you get a spot</strong><span>Check the payment amount and recipient with the organizer before you pay.</span></span>
+            </li>
+          </ol>
+          <a class="button button-primary signup-cta" href="https://discord.gg/CNAuKXB7fp" target="_blank" rel="noopener noreferrer">Join Discord to apply ↗</a>
+        </div>
+        <aside class="payment-card" aria-label="Payment details for accepted applicants">
+          <span class="payment-label">For accepted students</span>
+          <h3>Class payment</h3>
+          <p>Got a spot? Check the details with the organizer, then use this PayPal QR.</p>
+          <img class="payment-qr" src="flight-class-payment.png" alt="PayPal payment QR code supplied for the flight class">
+          <p class="payment-warning">This QR is visible to anyone on the website. Confirm the recipient and amount with the organizer, and never pay before acceptance.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="copilot wrap" id="fly-together">
+      <div class="copilot-panel">
+        <div>
+          <div class="eyebrow">Something we’ve been checking out</div>
+          <h2>Ever wanted a copilot in your sim?</h2>
+          <p>FSCoPilot is a shared-cockpit project for Microsoft Flight Simulator. Have a look if you’re interested in trying a flight with someone else.</p>
+        </div>
+        <a class="button button-primary" href="https://fscopilot.com" target="_blank" rel="noopener noreferrer">Explore FSCoPilot ↗</a>
+      </div>
+    </section>
+
+    <section class="section resources" id="resources">
+      <div class="resource-grid wrap">
+        <div class="resource-copy">
+          <div class="eyebrow">The flight bag</div>
+          <h2>A few good places to start.</h2>
+          <p>Some useful links for discovering flight simulation and finding out more about flying with a copilot.</p>
+        </div>
+        <div class="resource-links">
+          <a class="resource-link" href="https://www.flightsimulator.com/" target="_blank" rel="noopener noreferrer">
+            <span class="resource-icon" aria-hidden="true">01</span>
+            <span><strong>Microsoft Flight Simulator</strong><small>Explore the official flight simulator</small></span>
+            <span class="resource-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="resource-link" href="https://www.vatsim.net/" target="_blank" rel="noopener noreferrer">
+            <span class="resource-icon" aria-hidden="true">02</span>
+            <span><strong>VATSIM</strong><small>Learn about online flight simulation</small></span>
+            <span class="resource-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="resource-link" href="https://fscopilot.com" target="_blank" rel="noopener noreferrer">
+            <span class="resource-icon" aria-hidden="true">03</span>
+            <span><strong>FSCoPilot</strong><small>Visit the shared-cockpit project website</small></span>
+            <span class="resource-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <aside class="safety-note">
+          <b>Real-world flying?</b>
+          <span>This club is for learning and flight simulation, not flight instruction. For real aviation training, involve a parent or guardian and learn with a certified flight instructor. Follow each community’s age rules and safety guidelines.</span>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner wrap">
+      <p>© 2026 AreoVerse Teen Aviation Club<br>Made for curious minds and wide-open skies.</p>
+      <div class="footer-links">
+        <a href="#club">Our club</a>
+        <a href="#signup">Sign up</a>
+        <a href="#resources">Flight bag</a>
+        <a href="https://discord.gg/CNAuKXB7fp" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
